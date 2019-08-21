@@ -290,7 +290,7 @@ function findBestSlot(c) {
 		slots[1][0],slots[2][0],slots[3][0],
 		slots[1][4],slots[2][4],slots[3][4]
 	];
-	var suitToMatch = c.dataset.suit;
+	var suitToMatch = [c.dataset.suit];
 	var foundSlots = false;
 	var tries = 0;
 	while(!foundSlots) {
@@ -307,7 +307,7 @@ function findBestSlot(c) {
 			
 			var ac = adjacent.lastElementChild;
 			if(ac) {
-				if(ac.dataset.suit == suitToMatch) {
+				if(suitToMatch.indexOf(ac.dataset.suit)>=0) {
 					if(Number(ac.dataset.value)>bestScore) {
 						bestScore = Number(ac.dataset.value);
 						bestSlot = [royalSlots[s]];
@@ -321,10 +321,15 @@ function findBestSlot(c) {
 		}
 		if(bestSlot.length == 0) {
 			//try again with the other suit:
-			if(tries==1 || tries == 3) {
-				suitToMatch = {"hearts":"diamonds", "diamonds":"hearts", "clubs":"spades","spades":"clubs"}[suitToMatch];
+			if(tries==1) {
+				suitToMatch.push({"hearts":"diamonds", "diamonds":"hearts", "clubs":"spades","spades":"clubs"}[suitToMatch[0]]);
 			} else {
-				suitToMatch = {"hearts":"clubs", "diamonds":"spades", "clubs":"hearts","spades":"diamonds"}[suitToMatch];
+				suitToMatch.push("hearts"); 
+				suitToMatch.push("diamonds"); 
+				suitToMatch.push("clubs"); 
+				suitToMatch.push("spades");
+				suitToMatch.push("Joker1");
+				suitToMatch.push("Joker2");
 			}
 		} else {
 			foundSlots = true;
