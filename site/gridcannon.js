@@ -391,6 +391,7 @@ function drop(e) {
 		var isRoyal = c.dataset.value>=10;
 		if(this.id=="shamePile" && !isRoyal) {
 			this.appendChild(c);
+			tryDrawCard();
 			return;
 		}
 		if(!isRoyal && (this.dataset.x==0 || this.dataset.x==4 || this.dataset.y==0 || this.dataset.y==4)) {
