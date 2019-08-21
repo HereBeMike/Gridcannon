@@ -115,6 +115,7 @@ function init() {
 }
 
 .slot {
+	overflow:hidden;
 	position:relative;
 	width:${cardWidth+2}px;
 	height:${cardHeight+2}px;
