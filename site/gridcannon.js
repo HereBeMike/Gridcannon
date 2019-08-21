@@ -75,6 +75,51 @@ function init() {
 .card:first-child {
 	margin-left:initial;
 }
+
+.card.hearts:before,
+.card.hearts:after {
+	content: '\\2665';
+    color: red;
+}
+.card.diamonds:before,
+.card.diamonds:after {
+	content:'\\2666';
+    color: red;
+}
+.card.spades:before,
+.card.spades:after {
+	content:'\\2660';
+    color: black;
+}
+.card.clubs:before,
+.card.clubs:after {
+	content:'\\2663';
+    color: black;
+}
+
+.card:after,
+.card:before {
+    text-align: center;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    font-size: ${cardHeight*0.9}px;
+    overflow: hidden;
+}
+.card:after {
+    color: white !important;
+    padding-top:${cardHeight*0.17}px;
+    font-size: ${cardHeight*0.64}px;
+}
+
+.card.facedown:before,
+.card.facedown:after {
+	content:' ';
+}
+
 .spread .card:first-child,
 .slot .card:first-child {
 	margin-left:0px !important;
@@ -211,6 +256,7 @@ function card(value, suit) {
 	result.classList.add('card', suit, 'value-'+value);
 	result.dataset.value = value=="J"?0:value;
 	result.dataset.suit = suit;
+	result.dataset.v = Number(value=="J"?0:value)+1;
 
 	var header = document.createElement('div');
 	header.classList.add('header');
@@ -346,7 +392,7 @@ function dragstart(e) {
 		return;
 	}
 	e.dataTransfer.setData('text', '.card[data-value="'+e.target.dataset.value + '"][data-suit="'+e.target.dataset.suit+'"]');
-
+	
 
 	if(c.dataset.value>9) {
 
