@@ -406,7 +406,7 @@ function drop(e) {
 			}
 			if(c.dataset.value<currentValue) {
 				//var isJoker = c.dataset.suit[0]=="J";
-				if(c.dataset.value == 0) {
+				if(c.dataset.value == 0 || this.id=="shamePile") {
 					//joker or ace
 					console.log("Moving stack to bottom of deck, due to jack or ace");
 					var draw = document.getElementById('draw');
