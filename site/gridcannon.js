@@ -389,6 +389,10 @@ function drop(e) {
 	if(c) {
 		if(c.dataset.value==0 && this.id=="shamePile") return;//Don't accept an ace or joker in the pile of shame
 		var isRoyal = c.dataset.value>=10;
+		if(this.id=="shamePile" && !isRoyal) {
+			this.appendChild(c);
+			return;
+		}
 		if(!isRoyal && (this.dataset.x==0 || this.dataset.x==4 || this.dataset.y==0 || this.dataset.y==4)) {
 			//Can't drop here
 			console.warn("Can't put a low card on a royal slot")
