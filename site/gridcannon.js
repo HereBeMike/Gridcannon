@@ -392,7 +392,7 @@ function dragstart(e) {
 		return;
 	}
 	e.dataTransfer.setData('text', '.card[data-value="'+e.target.dataset.value + '"][data-suit="'+e.target.dataset.suit+'"]');
-	
+	window.dragCard = e.target;
 
 	if(c.dataset.value>9) {
 
@@ -436,8 +436,8 @@ function drop(e) {
 		options[i].classList.remove('option');
 	}
 	document.getElementById('shamePile').classList.remove('option');
-
-	var c = document.querySelector(e.dataTransfer.getData('text'));
+e.preventDefault();
+	var c = window.dragCard;//document.querySelector(e.dataTransfer.getData('text'));
 	if(c) {
 		if(c.dataset.value==0 && this.id=="shamePile") return;//Don't accept an ace or joker in the pile of shame
 		var isRoyal = c.dataset.value>=10;
@@ -468,7 +468,7 @@ function drop(e) {
 					console.log("Moving stack to bottom of deck, due to jack or ace");
 					var draw = document.getElementById('draw');
 					var items = this.querySelectorAll('.card');
-					for(var i=0; i<items.length; i++) {
+					for(var i=items.length-1; i>=0; i--) {
 						if(draw.getElementsByClassName('card').length==0) {
 							draw.appendChild(items[i]);
 						} else {
