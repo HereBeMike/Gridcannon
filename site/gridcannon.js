@@ -25,7 +25,7 @@ function init() {
 
 	var style = document.createElement('style');
 	var cardRatio = (3.5/2.5);
-	var cardWidth = 130;
+	var cardWidth = 98;
 	var cardHeight = cardWidth*cardRatio;
 	var cardRadius = cardWidth/10;
 	var cardSpacing = cardWidth/20;
