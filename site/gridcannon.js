@@ -356,7 +356,7 @@ function dragstart(e) {
 				var sc = slots[y][x].lastElementChild;
 				console.log(sc);
 				if(sc) {
-					if(sc.dataset.value<=c.dataset.value) {
+					if(sc.dataset.value<=c.dataset.value || c.dataset.value==0) {
 						slots[y][x].classList.add('option');
 					}
 				} else {
