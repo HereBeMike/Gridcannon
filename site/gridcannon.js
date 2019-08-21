@@ -484,6 +484,7 @@ function dealDeck() {
 	hold.classList.add('spread');
 	for(var i=0; i<deck.length; i++) {
 		draw.appendChild(deck[i]);
+		deck[i].classList.add('facedown');
 	}
 
 	var atx = 1;
