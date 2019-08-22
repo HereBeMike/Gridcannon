@@ -503,6 +503,18 @@ function dragstart(e) {
 				slots[1][4],slots[2][4],slots[3][4]
 			];
 			for(var i=0; i<royalSlots.length; i++) {
+				//Todo: the rule is that the armour must be applied to the royal most like it.
+				/*That means: 
+					1 - matching suit jack
+					2 - matching suit queen
+					3 - matching suit king
+					4 - matching colour jack
+					5 - matching colour queen
+					6 - matching colour king
+					7 - any jack
+					8 - any queen
+					9 - any king
+				*/
 				if(!royalSlots[i].classList.contains('dead') && royalSlots[i].childElementCount == 1) {
 					royalSlots[i].classList.add('option');
 					window.allowArmour.push(royalSlots[i]);
@@ -550,10 +562,10 @@ e.preventDefault();
 				//If we have no other choice we can armour a royal, and then chose a slot to empty
 				this.insertBefore(c, this.lastElementChild);
 				this.dataset.armour = ["+",Number(c.dataset.value)+1].join('');
-				startClearSlot();
+				//Getting armour doesn't clear a stack! startClearSlot();
 				//remember to calculate damage, since we just added armour:
 				calculateDamages();
-				//tryDrawCard();
+				tryDrawCard();
 			} else {
 				//Can't drop here
 				console.warn("Can't put a low card on a royal slot");
