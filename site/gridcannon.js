@@ -3,6 +3,7 @@ var deck = [];
 var slots = [];
 
 window.addEventListener('load', function() {
+	window.allowArmour = [];
 	initLayout();
 
 	init();
@@ -190,15 +191,78 @@ background-size: 100px 50px;
 }
 
 
-.slot.target:after {
-	content: attr("data-damage");
-	color:red;
+.slot.outer:hover:after {
+	content: attr(data-damage);
+	color:white;
+	text-shadow:1px 1px 3px rgba(110,112,120,1);
+	background-color:rgba(110,112,120,0.3);
+	box-shadow:inset 0 0 ${cardWidth/3}px ${cardWidth/10}px rgba(110,112,120,1);
+	font-weight:bold;
 	position:absolute;
-	background-color:rgba(255,0,0,0.3);
+	font-size:${cardHeight/6}px;
+	padding-top:${(cardHeight/6)*2}px;
+	text-align:center;
+	font-family:sans-serif;
 	top:0;
 	left:0;
 	right:0;
 	bottom:0;
+}
+.slot.outer.killable:hover:after {
+	content: attr(data-damage);
+	color:white;
+	text-shadow:1px 1px 3px rgba(255,0,0,1);
+	background-color:rgba(200,0,0,0.3);
+	box-shadow:inset 0 0 ${cardWidth/3}px ${cardWidth/10}px rgba(255,0,0,1);
+	font-weight:bold;
+	position:absolute;
+	font-size:${cardHeight/6}px;
+	padding-top:${(cardHeight/6)*2}px;
+	text-align:center;
+	font-family:sans-serif;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+}
+.slot.outer.dead.killable:hover:after,
+.slot.outer.dead:hover:after,
+.slot.outer.killable:empty:hover:after,
+.slot.outer:empty:hover:after {
+	display:none;
+}
+
+.slot.clearable:after {
+	content: 'Click to return to deck';
+	color:white;
+	text-shadow:1px 1px 3px rgba(60,130,255,1);
+	background-color:rgba(60,130,255,0.2);
+	box-shadow:inset 0 0 ${cardWidth/3}px ${cardWidth/10}px rgba(60,130,255,0.3);
+	font-weight:bold;
+	position:absolute;
+	font-size:${cardHeight/6}px;
+	padding-top:${(cardHeight/6)*2}px;
+	text-align:center;
+	font-family:sans-serif;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+}
+.slot[data-armour]:before {
+	position:absolute;
+	z-index:10;
+	top:0;
+	right:0;
+	padding:${cardRadius}px;
+	content:attr(data-armour);
+	color:blue;
+	font-family:sans-serif;
+	font-size:${cardRadius*1.5}px;
+	font-weight:bold;
+}
+.slot.dead[data-armour]:before {
+	display:none;
 }
 
 #shamePile.option:after,
@@ -264,6 +328,7 @@ function card(value, suit) {
 
 	result.appendChild(header);
 	result.addEventListener('dragstart', dragstart);
+	result.addEventListener('dragend', dragend);
 	return result;
 }
 
@@ -309,9 +374,17 @@ function initLayout() {
 			}
 			field.appendChild(slots[y][x]);
 
+			if((y==0||y==4) && x>0&&x<4)slots[y][x].classList.add('outer');
+			if((x==0||x==4) && y>0&&y<4)slots[y][x].classList.add('outer');
+
 			slots[y][x].addEventListener('dragover', dragover);
 			slots[y][x].addEventListener('dragenter', dragenter);
 			slots[y][x].addEventListener('drop', drop);
+		}
+	}
+	for(var y=1; y<4;y++) {
+		for(var x=1; x<4;x++) {
+			slots[y][x].addEventListener('click', completeClearSlot);
 		}
 	}
 
@@ -381,6 +454,8 @@ function findBestSlot(c) {
 			foundSlots = true;
 		}
 	}
+
+
 	
 	return bestSlot;
 }
@@ -403,6 +478,7 @@ function dragstart(e) {
 		}
 	} else {
 		//console.log('here', c.dataset.value);
+		var fountOption = false;
 		for(var y=1; y<4; y++) {
 			for(var x=1; x<4; x++) {
 				var sc = slots[y][x].lastElementChild;
@@ -410,13 +486,29 @@ function dragstart(e) {
 				if(sc) {
 					if(sc.dataset.value<=c.dataset.value || c.dataset.value==0) {
 						slots[y][x].classList.add('option');
+						fountOption = true;
 					}
 				} else {
 					slots[y][x].classList.add('option');
+					fountOption = true;
 				}
 			}
 		}
 		document.getElementById('shamePile').classList.add('option');
+		if(!fountOption) {
+			var royalSlots = [
+				slots[0][1],slots[0][2],slots[0][3],
+				slots[4][1],slots[4][2],slots[4][3],
+				slots[1][0],slots[2][0],slots[3][0],
+				slots[1][4],slots[2][4],slots[3][4]
+			];
+			for(var i=0; i<royalSlots.length; i++) {
+				if(!royalSlots[i].classList.contains('dead') && royalSlots[i].childElementCount == 1) {
+					royalSlots[i].classList.add('option');
+					window.allowArmour.push(royalSlots[i]);
+				}
+			}
+		}
 	}
 
 }
@@ -426,32 +518,49 @@ function dragover(e){
 function dragenter(e) {
   e.preventDefault()
 }
-function drop(e) {
-	//Figure out how to append the dragged card...
-	//console.log(e);
-	//console.log(e.dataTransfer.getData('text'));
-
+function dragend(e) {
 	var options = document.querySelectorAll('.slot.option');
 	for(var i=0; i<options.length; i++) {
 		options[i].classList.remove('option');
 	}
 	document.getElementById('shamePile').classList.remove('option');
+}
+function drop(e) {
+	//Figure out how to append the dragged card...
+	//console.log(e);
+	//console.log(e.dataTransfer.getData('text'));
+
+	var allowArmour = [].concat(window.allowArmour); //copy the list. I hate javascript...
+	window.allowArmour = [];
+
 e.preventDefault();
+
 	var c = window.dragCard;//document.querySelector(e.dataTransfer.getData('text'));
 	if(c) {
 		if(c.dataset.value==0 && this.id=="shamePile") return;//Don't accept an ace or joker in the pile of shame
 		var isRoyal = c.dataset.value>=10;
 		if(this.id=="shamePile" && !isRoyal) {
 			this.appendChild(c);
-			tryDrawCard();
+			startClearSlot();
+			//tryDrawCard();
 			return;
 		}
 		if(!isRoyal && (this.dataset.x==0 || this.dataset.x==4 || this.dataset.y==0 || this.dataset.y==4)) {
-			//Can't drop here
-			console.warn("Can't put a low card on a royal slot")
+			if(allowArmour.indexOf(this)>=0) {
+				//If we have no other choice we can armour a royal, and then chose a slot to empty
+				this.insertBefore(c, this.lastElementChild);
+				this.dataset.armour = ["+",Number(c.dataset.value)+1].join('');
+				startClearSlot();
+				//remember to calculate damage, since we just added armour:
+				calculateDamages();
+				//tryDrawCard();
+			} else {
+				//Can't drop here
+				console.warn("Can't put a low card on a royal slot");
+			}
 			return;
 		} else if(isRoyal && !(this.dataset.x==0 || this.dataset.x==4 || this.dataset.y==0 || this.dataset.y==4)){
-			console.warn("Can't put a royal card on a cannon slot")
+			console.warn("Can't put a royal card on a cannon slot");
 			return;
 		}
 
@@ -536,6 +645,35 @@ function tryDrawCard() {
 }
 
 
+function startClearSlot() {
+	for(var y=1; y<4;y++) {
+		for(var x=1; x<4;x++) {
+			slots[y][x].classList.add('clearable');
+		}
+	}
+}
+function completeClearSlot(e) {
+	if(this.classList.contains('clearable')) {
+		var cards = this.querySelectorAll('.card');
+		var draw = document.getElementById('draw');
+		for(var i=cards.length-1; i>=0; i--) {
+			if(draw.childElementCount==0) {
+				draw.appendChild(cards[i]);
+			} else {
+				draw.insertBefore(cards[i], draw.firstElementChild);
+			}
+			cards[i].classList.add('facedown');
+		}
+		var clearable = document.querySelectorAll('.clearable');
+		for(var i=0; i<clearable.length; i++) {
+			clearable[i].classList.remove('clearable');
+		}
+	}
+
+	calculateDamages();
+	tryDrawCard();
+}
+
 
 function dealDeck() {
 	hold.classList.add('spread');
@@ -582,42 +720,35 @@ function resolveDamage(x,y) {
 	var isKing = c.dataset.value == 12;
 	var isQueen = c.dataset.value == 11;
 	var isJack = c.dataset.value == 10;
+	var damageTotal = 0;
+	var slotCards =	slots[y][x].querySelectorAll('.card');
+	for(var i=0; i<slotCards.length; i++) {
+		damageTotal += Number(slotCards[i].dataset.value)+1
+	}
 
-
-	if(Number(slots[y][x].dataset.damage)<Number(c.dataset.value)+1) {
+	if(Number(slots[y][x].dataset.damage)<Number(damageTotal)) {
 		//can't kill this one
-		console.log("Can't kill Royal because there is not enough damage",Number(slots[y][x].dataset.damage),Number(c.dataset.value)+1);
+		console.log("Can't kill Royal because there is not enough damage",Number(slots[y][x].dataset.damage),Number(damageTotal));
 		return;
 	}
 
+	var kill = false;
 	if(isKing) {
 		if(x==0) {
-			var kill = slots[y][x+1].lastElementChild.dataset.suit == c.dataset.suit;
+			kill = slots[y][x+1].lastElementChild.dataset.suit == c.dataset.suit;
 			kill = kill & slots[y][x+2].lastElementChild.dataset.suit == c.dataset.suit;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 		if(x==4) {
-			var kill = slots[y][x-1].lastElementChild.dataset.suit == c.dataset.suit;
+			kill = slots[y][x-1].lastElementChild.dataset.suit == c.dataset.suit;
 			kill = kill & slots[y][x-2].lastElementChild.dataset.suit == c.dataset.suit;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 		if(y==0) {
-			var kill = slots[y+1][x].lastElementChild.dataset.suit == c.dataset.suit;
+			kill = slots[y+1][x].lastElementChild.dataset.suit == c.dataset.suit;
 			kill = kill & slots[y+2][x].lastElementChild.dataset.suit == c.dataset.suit;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 		if(y==4) {
-			var kill = slots[y-1][x].lastElementChild.dataset.suit == c.dataset.suit;
+			kill = slots[y-1][x].lastElementChild.dataset.suit == c.dataset.suit;
 			kill = kill & slots[y-2][x].lastElementChild.dataset.suit == c.dataset.suit;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 	} else if(isQueen) {
 		var suits = {
@@ -628,101 +759,129 @@ function resolveDamage(x,y) {
 		};
 		var matchSuits = suits[c.dataset.suit];
 		if(x==0) {
-			var kill = matchSuits.indexOf(slots[y][x+1].lastElementChild.dataset.suit)>=0;
+			kill = matchSuits.indexOf(slots[y][x+1].lastElementChild.dataset.suit)>=0;
 			kill = kill & matchSuits.indexOf(slots[y][x+2].lastElementChild.dataset.suit)>=0;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 		if(x==4) {
-			var kill = matchSuits.indexOf(slots[y][x-1].lastElementChild.dataset.suit)>=0;
+			kill = matchSuits.indexOf(slots[y][x-1].lastElementChild.dataset.suit)>=0;
 			kill = kill & matchSuits.indexOf(slots[y][x-2].lastElementChild.dataset.suit)>=0;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 		if(y==0) {
-			var kill = matchSuits.indexOf(slots[y+1][x].lastElementChild.dataset.suit)>=0;
+			kill = matchSuits.indexOf(slots[y+1][x].lastElementChild.dataset.suit)>=0;
 			kill = kill & matchSuits.indexOf(slots[y+2][x].lastElementChild.dataset.suit)>=0;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 		if(y==4) {
-			var kill = matchSuits.indexOf(slots[y-1][x].lastElementChild.dataset.suit)>=0;
+			kill = matchSuits.indexOf(slots[y-1][x].lastElementChild.dataset.suit)>=0;
 			kill = kill & matchSuits.indexOf(slots[y-2][x].lastElementChild.dataset.suit)>=0;
-			if(kill) {
-				c.classList.add('facedown');
-			}
 		}
 	} else {
+		kill = true;
+	}
+	if(kill) {
 		c.classList.add('facedown');
+		slots[y][x].classList.add('dead');
 	}
 }
 
 function calculateDamages() {
 	
-	function getCardDamage(x,y) {
+	function getCardDamage(x,y, suits) {
+		var result =  {damage:0, match:false };
 		//slots are y,x for no reason
 		var c = slots[y][x].lastElementChild;
 		if(c) {
-			if(c.dataset.suit[0]=='J') return 0;
-			return Number(c.dataset.value)+1;
+			if(c.dataset.suit[0]=='J') {
+				result.damage = 0;
+				result.match = suits.indexOf(c.dataset.suit)>=0;
+			} else {
+				result.damage = Number(c.dataset.value)+1;
+				result.match = suits.indexOf(c.dataset.suit)>=0;
+			}
 		}
-		return 0;
+		return result;
+	}
+
+	function slotKillable(x,y, x1,y1, x2,y2) {
+
+		var suit = [];
+		var childCard = slots[y][x].lastElementChild;
+		if(childCard) {
+			
+			if(childCard.dataset.value==11) {
+				//queen
+				suit = [childCard.dataset.suit , 
+					{"hearts":"diamonds", "diamonds":"hearts", "clubs":"spades","spades":"clubs"}[childCard.dataset.suit]];
+			} else if(childCard.dataset.value==12) {
+				//king
+				suit = [childCard.dataset.suit];
+			} else {
+				suit = ['hearts', 'diamonds', 'clubs', 'spades'];
+			}
+		}
+
+		var damage1 = getCardDamage(x1,y1, suit);
+		var damage2 = getCardDamage(x2,y2, suit);
+		var damage = Number(damage1.damage) + Number(damage2.damage);
+		var canKillTarget = damage1.match && damage2.match;
+
+		if(canKillTarget) {
+
+			var damageTotal = 0;
+			var slotCards =	slots[y][x].querySelectorAll('.card');
+			for(var i=0; i<slotCards.length; i++) {
+				damageTotal += Number(slotCards[i].dataset.value)+1
+			}
+
+			if(childCard && damageTotal <= damage) {
+				slots[y][x].classList.add('killable');
+			} else {
+				slots[y][x].classList.remove('killable');
+			}
+		} else {
+			slots[y][x].classList.remove('killable');
+		}
+
+		return damage;
 	}
 
 	var y=0, x=1;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x,y+1) +
-		getCardDamage(x,y+2);
+		slotKillable(x,y, x,y+1, x,y+2);
 	x++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x,y+1) +
-		getCardDamage(x,y+2);
+		slotKillable(x,y, x,y+1, x,y+2);
 	x++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x,y+1) +
-		getCardDamage(x,y+2);
+		slotKillable(x,y, x,y+1, x,y+2);
 
 	y=4, x=1;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x,y-1) +
-		getCardDamage(x,y-2);
+		slotKillable(x,y, x,y-1, x,y-2);
 	x++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x,y-1) +
-		getCardDamage(x,y-2);
+		slotKillable(x,y, x,y-1, x,y-2);
 	x++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x,y-1) +
-		getCardDamage(x,y-2);
-
+		slotKillable(x,y, x,y-1, x,y-2);
 
 	y=1, x=0;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x+1,y) +
-		getCardDamage(x+2,y);
+		slotKillable(x,y, x+1,y, x+2,y);
 	y++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x+1,y) +
-		getCardDamage(x+2,y);
+		slotKillable(x,y, x+1,y, x+2,y);
 	y++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x+1,y) +
-		getCardDamage(x+2,y);
+		slotKillable(x,y, x+1,y, x+2,y);
 
 	y=1, x=4;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x-1,y) +
-		getCardDamage(x-2,y);
+		slotKillable(x,y, x-1,y, x-2,y);
 	y++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x-1,y) +
-		getCardDamage(x-2,y);
+		slotKillable(x,y, x-1,y, x-2,y);
 	y++;
 	slots[y][x].dataset.damage = 
-		getCardDamage(x-1,y) +
-		getCardDamage(x-2,y);
+		slotKillable(x,y, x-1,y, x-2,y);
 }
 
