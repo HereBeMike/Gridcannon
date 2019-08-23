@@ -582,7 +582,7 @@ e.preventDefault();
 			if(this.lastElementChild) {
 				currentValue = this.lastElementChild.dataset.value;
 			}
-			if(c.dataset.value<currentValue) {
+			if(c.dataset.value<currentValue || c.dataset.value == 0) {
 				//var isJoker = c.dataset.suit[0]=="J";
 				if(c.dataset.value == 0 || this.id=="shamePile") {
 					//joker or ace
@@ -645,19 +645,28 @@ function getAdjacent(slot) {
 }
 
 function tryDrawCard() {
-	if(document.querySelectorAll('#hold .card').length>0) {
+	var draw = document.getElementById('draw');
+	var activeCard = document.getElementById('activeCard');
+	if(document.querySelectorAll('#hold .card').length>0 || activeCard.childElementCount>0) {
 		return;
 		//can't draw until all held cards are done
 	}
-	var c = document.querySelector('#draw .card:last-child');
-	c.classList.remove('facedown');
-	c.setAttribute('draggable',true);
+	if(draw.childElementCount>0) {
+		var c = draw.lastElementChild;
+		c.classList.remove('facedown');
+		c.setAttribute('draggable',true);
 
-	document.getElementById('activeCard').appendChild(c);
+		document.getElementById('activeCard').appendChild(c);
+	} else {
+		startClearSlot(true);
+	}
 }
 
 
-function startClearSlot() {
+function startClearSlot(shame) {
+	if(shame) {
+		window.shame=true;
+	}
 	for(var y=1; y<4;y++) {
 		for(var x=1; x<4;x++) {
 			slots[y][x].classList.add('clearable');
@@ -666,6 +675,10 @@ function startClearSlot() {
 }
 function completeClearSlot(e) {
 	if(this.classList.contains('clearable')) {
+		if(window.shame===true) {
+			window.shame=false;
+			document.getElementById('shamePile').appendChild(this.lastElementChild);
+		}
 		var cards = this.querySelectorAll('.card');
 		var draw = document.getElementById('draw');
 		for(var i=cards.length-1; i>=0; i--) {
