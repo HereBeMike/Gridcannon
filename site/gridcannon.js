@@ -233,14 +233,14 @@ background-size: 100px 50px;
 }
 
 .slot.clearable:after {
-	content: 'Click to return to deck';
+	content: attr(data-returnmsg);
 	color:white;
 	text-shadow:1px 1px 3px rgba(60,130,255,1);
 	background-color:rgba(60,130,255,0.2);
 	box-shadow:inset 0 0 ${cardWidth/3}px ${cardWidth/10}px rgba(60,130,255,0.3);
 	font-weight:bold;
 	position:absolute;
-	font-size:${cardHeight/6}px;
+	font-size:${cardHeight/8}px;
 	padding-top:${(cardHeight/6)*2}px;
 	text-align:center;
 	font-family:sans-serif;
@@ -667,9 +667,15 @@ function startClearSlot(shame) {
 	if(shame) {
 		window.shame=true;
 	}
+	function howMany(n) {
+		if(n<5) return 'A few';
+		if(n<9) return 'Several';
+		return "Lots"
+	}
 	for(var y=1; y<4;y++) {
 		for(var x=1; x<4;x++) {
 			slots[y][x].classList.add('clearable');
+			slots[y][x].dataset.returnmsg = 'Click to return to deck (' + howMany(slots[y][x].childElementCount) + ')';
 		}
 	}
 }
