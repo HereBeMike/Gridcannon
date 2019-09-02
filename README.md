@@ -13,3 +13,10 @@ Find Tom on twitter here:
 I am not Tom. I just wanted to make a rough digital version of the game to fiddle with.
 
 -Mike
+
+PS: To anyone who reads the code, I apologise in advance - the code isn't clean or well organised at all. I hacked it together quickly to be able to play the game digitally. At first I was just going to do the grid layout and just follow the rules myself, but adding rules didn't seem that much more work... Now here we are.
+
+## Steam release
+For those interested, I will be releasing a more fully featured version on Steam some time soon. Please follow me on twitter to see any announcements. I'll also update this page with more details once it's live.
+
+Twitter: [@HereBeMike](https://twitter.com/HereBeMike)
