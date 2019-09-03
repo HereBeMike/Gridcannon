@@ -466,6 +466,10 @@ function dragstart(e) {
 		e.preventDefault();
 		return;
 	}
+	if(c!=this || this.parentNode.classList.contains("slot")) {
+		e.preventDefault();
+		return;
+	}
 	e.dataTransfer.setData('text', '.card[data-value="'+e.target.dataset.value + '"][data-suit="'+e.target.dataset.suit+'"]');
 	window.dragCard = e.target;
 
