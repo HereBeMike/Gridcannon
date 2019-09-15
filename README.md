@@ -1,7 +1,7 @@
 # Gridcannon
 Gridcannon - solitaire card game designed by Tom Francis
 
-[Play](https://herebemike.github.io/Gridcannon/site/) [Steam store page](https://store.steampowered.com/app/1152680/Gridcannon/)
+[Play](https://herebemike.github.io/Gridcannon/site/) _|_ [Steam store page](https://store.steampowered.com/app/1152680/Gridcannon/)
 
 See Tom's original post here:
 [Gridcannon: A Single Player Game With Regular Playing Cards](https://www.pentadact.com/2019-08-20-gridcannon-a-single-player-game-with-regular-playing-cards/)
