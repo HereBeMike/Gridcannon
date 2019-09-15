@@ -20,3 +20,5 @@ PS: To anyone who reads the code, I apologise in advance - the code isn't clean 
 For those interested, I will be releasing a more fully featured version on Steam some time soon. Please follow me on twitter to see any announcements. I'll also update this page with more details once it's live.
 
 Twitter: [@HereBeMike](https://twitter.com/HereBeMike)
+
+_Update_: The Steam store page is online, release date is "soon". [Wishlist on steam here](https://store.steampowered.com/app/1152680/Gridcannon/)
